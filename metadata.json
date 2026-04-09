@@ -1,0 +1,5 @@
+{
+  "name": "Học Tiếng Trung - Chinese Learning App",
+  "description": "Ứng dụng học tiếng Trung cho người mới bắt đầu với bài học tương tác, luyện viết chữ, phát âm và theo dõi tiến độ.",
+  "requestFramePermissions": ["microphone"]
+}

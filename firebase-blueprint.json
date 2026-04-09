@@ -1,0 +1,37 @@
+{
+  "entities": {
+    "userProgress": {
+      "title": "User Progress",
+      "description": "Tracks the learning progress of a user for different lessons.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique ID of the user." },
+        "lessonId": { "type": "string", "description": "The ID of the lesson." },
+        "progress": { "type": "number", "description": "The progress percentage (0-100)." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "The last time the progress was updated." }
+      },
+      "required": ["uid", "lessonId", "progress", "updatedAt"]
+    },
+    "userStats": {
+      "title": "User Stats",
+      "description": "General statistics for the user.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique ID of the user." },
+        "totalWordsLearned": { "type": "number", "description": "Total number of words the user has mastered." },
+        "lastActive": { "type": "string", "format": "date-time", "description": "Last time the user was active." }
+      },
+      "required": ["uid", "totalWordsLearned", "lastActive"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/progress/{lessonId}": {
+      "schema": "userProgress",
+      "description": "Stores progress for a specific lesson for a specific user."
+    },
+    "/users/{userId}/stats/main": {
+      "schema": "userStats",
+      "description": "Stores general stats for a specific user."
+    }
+  }
+}

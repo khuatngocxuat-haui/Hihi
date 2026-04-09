@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: /users/{userId}/progress
+    // Document ID: {lessonId}
+    // Fields:
+    //   - uid: string (required) - The user's ID
+    //   - lessonId: string (required) - The lesson's ID
+    //   - progress: number (required, 0-100) - Progress percentage
+    //   - updatedAt: timestamp (required) - Last update time
+    //
+    // Collection: /users/{userId}/stats
+    // Document ID: main
+    // Fields:
+    //   - uid: string (required) - The user's ID
+    //   - totalWordsLearned: number (required) - Total words mastered
+    //   - lastActive: timestamp (required) - Last active time
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidProgress(data) {
+      return data.keys().hasAll(['uid', 'lessonId', 'progress', 'updatedAt']) &&
+             data.uid == request.auth.uid &&
+             data.progress is number && data.progress >= 0 && data.progress <= 100 &&
+             data.updatedAt is timestamp;
+    }
+
+    function isValidStats(data) {
+      return data.keys().hasAll(['uid', 'totalWordsLearned', 'lastActive']) &&
+             data.uid == request.auth.uid &&
+             data.totalWordsLearned is number &&
+             data.lastActive is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      
+      match /progress/{lessonId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidProgress(request.resource.data);
+      }
+      
+      match /stats/main {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidStats(request.resource.data);
+      }
+    }
+    
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
